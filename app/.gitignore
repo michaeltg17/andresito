@@ -43,3 +43,5 @@ yarn-error.log
 
 # Jest
 .jestrc
+# stryker temp files
+.stryker-tmp

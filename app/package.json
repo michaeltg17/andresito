@@ -8,6 +8,8 @@
     "start": "node index.js"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^9.5.1",
+    "@stryker-mutator/jest-runner": "^9.5.1",
     "jest": "^29.0.0"
   },
   "keywords": [],
