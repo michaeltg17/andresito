@@ -1,0 +1,16 @@
+{
+  "name": "simple-addition-app",
+  "version": "1.0.0",
+  "description": "Simple Node.js app that adds two numbers",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node index.js"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
