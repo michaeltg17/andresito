@@ -7,5 +7,6 @@
     "progress"
   ],
   "testRunner": "jest",
+  "testRunnerNodeArgs": ["--experimental-vm-modules"],
   "coverageAnalysis": "perTest"
 }
