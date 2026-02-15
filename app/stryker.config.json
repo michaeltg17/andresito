@@ -4,7 +4,8 @@
   "reporters": [
     "html",
     "clear-text",
-    "progress"
+    "progress",
+    "json"
   ],
   "testRunner": "jest",
   "testRunnerNodeArgs": ["--experimental-vm-modules"],

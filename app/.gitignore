@@ -45,3 +45,4 @@ yarn-error.log
 .jestrc
 # stryker temp files
 .stryker-tmp
+reports
