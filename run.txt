@@ -1,0 +1,476 @@
+[2026-02-16T15:06:08.021Z] Starting mutation improvement process.
+[2026-02-16T15:06:08.025Z] ===== ITERATION 1 =====
+[2026-02-16T15:06:08.025Z] Running tests...
+[2026-02-16T15:06:08.026Z] Running Stryker...
+[32m16:06:09 (5584) INFO ProjectReader[39m Found 1 of 20 file(s) to be mutated.
+[32m16:06:09 (5584) INFO Instrumenter[39m Instrumented 1 source file(s) with 55 mutant(s)
+[32m16:06:09 (5584) INFO ConcurrencyTokenProvider[39m Creating 11 test runner process(es).
+[32m16:06:10 (5584) INFO BroadcastReporter[39m Detected that current console does not support the "progress" reporter, downgrading to "progress-append-only" reporter
+[32m16:06:10 (5584) INFO DryRunExecutor[39m Starting initial test run (jest test runner with "perTest" coverage analysis). This may take a while.
+[32m16:06:11 (5584) INFO DryRunExecutor[39m Initial test run succeeded. Ran 1 tests in 0 seconds (net 1 ms, overhead 694 ms).
+
+All tests/calculator.test.js
+  ✓ adds 2 + 3 = 5 [line 3] (killed 5)
+
+[NoCoverage] BlockStatement
+src/calculator.js:6:35
+-   export function subtract(...args) {
+-     if (args.length === 0) return 0
+-     if (args.length === 1) return -args[0]
+-     return args.slice(1).reduce((acc, v) => acc - v, args[0])
+-   }
++   export function subtract(...args) {}
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:7:7
+-     if (args.length === 0) return 0
++     if (true) return 0
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:7:7
+-     if (args.length === 0) return 0
++     if (false) return 0
+
+[NoCoverage] EqualityOperator
+src/calculator.js:7:7
+-     if (args.length === 0) return 0
++     if (args.length !== 0) return 0
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:8:7
+-     if (args.length === 1) return -args[0]
++     if (true) return -args[0]
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:8:7
+-     if (args.length === 1) return -args[0]
++     if (false) return -args[0]
+
+[NoCoverage] EqualityOperator
+src/calculator.js:8:7
+-     if (args.length === 1) return -args[0]
++     if (args.length !== 1) return -args[0]
+
+[NoCoverage] UnaryOperator
+src/calculator.js:8:33
+-     if (args.length === 1) return -args[0]
++     if (args.length === 1) return +args[0]
+
+[NoCoverage] MethodExpression
+src/calculator.js:9:10
+-     return args.slice(1).reduce((acc, v) => acc - v, args[0])
++     return args.reduce((acc, v) => acc - v, args[0])
+
+[NoCoverage] ArrowFunction
+src/calculator.js:9:31
+-     return args.slice(1).reduce((acc, v) => acc - v, args[0])
++     return args.slice(1).reduce(() => undefined, args[0])
+
+[NoCoverage] ArithmeticOperator
+src/calculator.js:9:43
+-     return args.slice(1).reduce((acc, v) => acc - v, args[0])
++     return args.slice(1).reduce((acc, v) => acc + v, args[0])
+
+[NoCoverage] BlockStatement
+src/calculator.js:12:35
+-   export function multiply(...args) {
+-     if (args.length === 0) return 0
+-     return args.reduce((acc, v) => acc * v, 1)
+-   }
++   export function multiply(...args) {}
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:13:7
+-     if (args.length === 0) return 0
++     if (true) return 0
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:13:7
+-     if (args.length === 0) return 0
++     if (false) return 0
+
+[NoCoverage] EqualityOperator
+src/calculator.js:13:7
+-     if (args.length === 0) return 0
++     if (args.length !== 0) return 0
+
+[NoCoverage] ArrowFunction
+src/calculator.js:14:22
+-     return args.reduce((acc, v) => acc * v, 1)
++     return args.reduce(() => undefined, 1)
+
+[NoCoverage] ArithmeticOperator
+src/calculator.js:14:34
+-     return args.reduce((acc, v) => acc * v, 1)
++     return args.reduce((acc, v) => acc / v, 1)
+
+[NoCoverage] BlockStatement
+src/calculator.js:17:33
+-   export function divide(...args) {
+-     if (args.length === 0) return NaN
+-     if (args.length === 1) return 1 / args[0]
+-     return args.slice(1).reduce((acc, v) => {
+-       if (v === 0) throw new Error('Division by zero')
+-       return acc / v
+-     }, args[0])
+-   }
++   export function divide(...args) {}
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:18:7
+-     if (args.length === 0) return NaN
++     if (true) return NaN
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:18:7
+-     if (args.length === 0) return NaN
++     if (false) return NaN
+
+[NoCoverage] EqualityOperator
+src/calculator.js:18:7
+-     if (args.length === 0) return NaN
++     if (args.length !== 0) return NaN
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:19:7
+-     if (args.length === 1) return 1 / args[0]
++     if (true) return 1 / args[0]
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:19:7
+-     if (args.length === 1) return 1 / args[0]
++     if (false) return 1 / args[0]
+
+[NoCoverage] EqualityOperator
+src/calculator.js:19:7
+-     if (args.length === 1) return 1 / args[0]
++     if (args.length !== 1) return 1 / args[0]
+
+[NoCoverage] ArithmeticOperator
+src/calculator.js:19:33
+-     if (args.length === 1) return 1 / args[0]
++     if (args.length === 1) return 1 * args[0]
+
+[NoCoverage] MethodExpression
+src/calculator.js:20:10
+-     return args.slice(1).reduce((acc, v) => {
++     return args.reduce((acc, v) => {
+
+[NoCoverage] BlockStatement
+src/calculator.js:20:43
+-     return args.slice(1).reduce((acc, v) => {
+-       if (v === 0) throw new Error('Division by zero')
+-       return acc / v
+-     }, args[0])
++     return args.slice(1).reduce((acc, v) => {}, args[0])
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:21:9
+-       if (v === 0) throw new Error('Division by zero')
++       if (true) throw new Error('Division by zero')
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:21:9
+-       if (v === 0) throw new Error('Division by zero')
++       if (false) throw new Error('Division by zero')
+
+[NoCoverage] EqualityOperator
+src/calculator.js:21:9
+-       if (v === 0) throw new Error('Division by zero')
++       if (v !== 0) throw new Error('Division by zero')
+
+[NoCoverage] StringLiteral
+src/calculator.js:21:34
+-       if (v === 0) throw new Error('Division by zero')
++       if (v === 0) throw new Error("")
+
+[NoCoverage] ArithmeticOperator
+src/calculator.js:22:12
+-       return acc / v
++       return acc * v
+
+[NoCoverage] BlockStatement
+src/calculator.js:26:27
+-   export function pow(a, b) {
+-     return Math.pow(a, b)
+-   }
++   export function pow(a, b) {}
+
+[NoCoverage] BlockStatement
+src/calculator.js:30:25
+-   export function sqrt(a) {
+-     return Math.sqrt(a)
+-   }
++   export function sqrt(a) {}
+
+[NoCoverage] BlockStatement
+src/calculator.js:34:34
+-   export function average(...args) {
+-     if (args.length === 0) return NaN
+-     return sum(...args) / args.length
+-   }
++   export function average(...args) {}
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:35:7
+-     if (args.length === 0) return NaN
++     if (true) return NaN
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:35:7
+-     if (args.length === 0) return NaN
++     if (false) return NaN
+
+[NoCoverage] EqualityOperator
+src/calculator.js:35:7
+-     if (args.length === 0) return NaN
++     if (args.length !== 0) return NaN
+
+[NoCoverage] ArithmeticOperator
+src/calculator.js:36:10
+-     return sum(...args) / args.length
++     return sum(...args) * args.length
+
+[NoCoverage] BlockStatement
+src/calculator.js:39:24
+-   export function abs(a) {
+-     return Math.abs(a)
+-   }
++   export function abs(a) {}
+
+[NoCoverage] BlockStatement
+src/calculator.js:43:27
+-   export function negate(a) {
+-     return -a
+-   }
++   export function negate(a) {}
+
+[NoCoverage] UnaryOperator
+src/calculator.js:44:10
+-     return -a
++     return +a
+
+[NoCoverage] BlockStatement
+src/calculator.js:47:36
+-   export function percent(value, of) {
+-     if (of === undefined) return value / 100
+-     return (value / 100) * of
+-   }
++   export function percent(value, of) {}
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:48:7
+-     if (of === undefined) return value / 100
++     if (true) return value / 100
+
+[NoCoverage] ConditionalExpression
+src/calculator.js:48:7
+-     if (of === undefined) return value / 100
++     if (false) return value / 100
+
+[NoCoverage] EqualityOperator
+src/calculator.js:48:7
+-     if (of === undefined) return value / 100
++     if (of !== undefined) return value / 100
+
+[NoCoverage] ArithmeticOperator
+src/calculator.js:48:32
+-     if (of === undefined) return value / 100
++     if (of === undefined) return value * 100
+
+[NoCoverage] ArithmeticOperator
+src/calculator.js:49:10
+-     return (value / 100) * of
++     return value / 100 / of
+
+[NoCoverage] ArithmeticOperator
+src/calculator.js:49:11
+-     return (value / 100) * of
++     return (value * 100) * of
+
+[Survived] ConditionalExpression
+src/calculator.js:2:7
+-     if (args.length === 0) return 0
++     if (false) return 0
+Tests ran:
+    adds 2 + 3 = 5
+
+
+Ran 0.11 tests per mutant on average.
+---------------|------------------|----------|-----------|------------|----------|----------|
+               | % Mutation score |          |           |            |          |          |
+File           |  total | covered | # killed | # timeout | # survived | # no cov | # errors |
+---------------|--------|---------|----------|-----------|------------|----------|----------|
+All files      |   9.09 |   83.33 |        5 |         0 |          1 |       49 |        0 |
+ calculator.js |   9.09 |   83.33 |        5 |         0 |          1 |       49 |        0 |
+---------------|--------|---------|----------|-----------|------------|----------|----------|
+[32m16:06:12 (5584) INFO JsonReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.json
+[32m16:06:12 (5584) INFO HtmlReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.html
+[32m16:06:12 (5584) INFO MutationTestExecutor[39m Done in 2 seconds.
+[2026-02-16T15:06:13.058Z] 1 mutants survived. Sending to LLM...
+[2026-02-16T15:06:57.384Z] Tests updated.
+[2026-02-16T15:06:57.385Z] ===== ITERATION 2 =====
+[2026-02-16T15:06:57.386Z] Running tests...
+[2026-02-16T15:06:57.387Z] Running Stryker...
+[32m16:06:58 (18828) INFO ProjectReader[39m Found 1 of 20 file(s) to be mutated.
+[32m16:06:59 (18828) INFO Instrumenter[39m Instrumented 1 source file(s) with 55 mutant(s)
+[32m16:06:59 (18828) INFO ConcurrencyTokenProvider[39m Creating 11 test runner process(es).
+[32m16:06:59 (18828) INFO BroadcastReporter[39m Detected that current console does not support the "progress" reporter, downgrading to "progress-append-only" reporter
+[32m16:06:59 (18828) INFO DryRunExecutor[39m Starting initial test run (jest test runner with "perTest" coverage analysis). This may take a while.
+[32m16:07:00 (18828) INFO DryRunExecutor[39m Initial test run succeeded. Ran 22 tests in 0 seconds (net 9 ms, overhead 720 ms).
+
+All tests/calculator.test.js
+  ✓ adds 2 + 3 = 5 [line 3] (killed 5)
+  ~ sum with no arguments returns 0 [line 7] (covered 4)
+  ~ sum with one argument returns that argument [line 11] (covered 6)
+  ~ sum with multiple arguments returns correct sum [line 15] (covered 6)
+  ✓ subtract with no arguments returns 0 [line 19] (killed 3)
+  ✓ subtract with one argument returns negative of that argument [line 23] (killed 4)
+  ✓ subtract with multiple arguments returns correct result [line 27] (killed 4)
+  ✓ multiply with no arguments returns 0 [line 31] (killed 3)
+  ✓ multiply with one argument returns that argument [line 35] (killed 3)
+  ~ multiply with multiple arguments returns correct product [line 39] (covered 6)
+  ~ divide with no arguments returns NaN [line 43] (covered 4)
+  ✓ divide with one argument returns reciprocal [line 47] (killed 6)
+  ✓ divide with multiple arguments returns correct result [line 51] (killed 6)
+  ✓ divide by zero throws error [line 55] (killed 2)
+  ✓ pow returns correct power [line 59] (killed 1)
+  ✓ sqrt returns correct square root [line 63] (killed 1)
+  ~ average with no arguments returns NaN [line 67] (covered 4)
+  ✓ average with arguments returns correct average [line 71] (killed 4)
+  ✓ abs returns absolute value [line 75] (killed 1)
+  ✓ negate returns negative value [line 79] (killed 2)
+  ✓ percent with one argument returns percentage [line 83] (killed 4)
+  ✓ percent with two arguments returns percentage of value [line 87] (killed 3)
+
+[Survived] ConditionalExpression
+src/calculator.js:2:7
+-     if (args.length === 0) return 0
++     if (false) return 0
+Tests ran:
+    adds 2 + 3 = 5
+    sum with no arguments returns 0
+    sum with one argument returns that argument
+  and 2 more tests!
+
+
+[Survived] ConditionalExpression
+src/calculator.js:18:7
+-     if (args.length === 0) return NaN
++     if (false) return NaN
+Tests ran:
+    divide with no arguments returns NaN
+    divide with one argument returns reciprocal
+    divide with multiple arguments returns correct result
+  and 1 more test!
+
+
+[Survived] ConditionalExpression
+src/calculator.js:35:7
+-     if (args.length === 0) return NaN
++     if (false) return NaN
+Tests ran:
+    average with no arguments returns NaN
+    average with arguments returns correct average
+
+
+Ran 2.35 tests per mutant on average.
+---------------|------------------|----------|-----------|------------|----------|----------|
+               | % Mutation score |          |           |            |          |          |
+File           |  total | covered | # killed | # timeout | # survived | # no cov | # errors |
+---------------|--------|---------|----------|-----------|------------|----------|----------|
+All files      |  94.55 |   94.55 |       52 |         0 |          3 |        0 |        0 |
+ calculator.js |  94.55 |   94.55 |       52 |         0 |          3 |        0 |        0 |
+---------------|--------|---------|----------|-----------|------------|----------|----------|
+[32m16:07:04 (18828) INFO JsonReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.json
+[32m16:07:04 (18828) INFO HtmlReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.html
+[32m16:07:04 (18828) INFO MutationTestExecutor[39m Done in 5 seconds.
+[2026-02-16T15:07:04.477Z] 3 mutants survived. Sending to LLM...
+[2026-02-16T15:08:02.721Z] Tests updated.
+[2026-02-16T15:08:02.722Z] ===== ITERATION 3 =====
+[2026-02-16T15:08:02.723Z] Running tests...
+[2026-02-16T15:08:02.723Z] Running Stryker...
+[32m16:08:04 (14496) INFO ProjectReader[39m Found 1 of 20 file(s) to be mutated.
+[32m16:08:04 (14496) INFO Instrumenter[39m Instrumented 1 source file(s) with 55 mutant(s)
+[32m16:08:04 (14496) INFO ConcurrencyTokenProvider[39m Creating 11 test runner process(es).
+[32m16:08:05 (14496) INFO BroadcastReporter[39m Detected that current console does not support the "progress" reporter, downgrading to "progress-append-only" reporter
+[32m16:08:05 (14496) INFO DryRunExecutor[39m Starting initial test run (jest test runner with "perTest" coverage analysis). This may take a while.
+[32m16:08:06 (14496) INFO DryRunExecutor[39m Initial test run succeeded. Ran 29 tests in 0 seconds (net 12 ms, overhead 715 ms).
+
+All tests/calculator.test.js
+  ✓ adds 2 + 3 = 5 [line 3] (killed 5)
+  ~ sum with no arguments returns 0 [line 7] (covered 4)
+  ~ sum with one argument returns that argument [line 11] (covered 6)
+  ~ sum with multiple arguments returns correct sum [line 15] (covered 6)
+  ✓ subtract with no arguments returns 0 [line 19] (killed 3)
+  ✓ subtract with one argument returns negative of that argument [line 23] (killed 4)
+  ✓ subtract with multiple arguments returns correct result [line 27] (killed 4)
+  ✓ multiply with no arguments returns 0 [line 31] (killed 3)
+  ✓ multiply with one argument returns that argument [line 35] (killed 3)
+  ~ multiply with multiple arguments returns correct product [line 39] (covered 6)
+  ~ divide with no arguments returns NaN [line 43] (covered 4)
+  ✓ divide with one argument returns reciprocal [line 47] (killed 6)
+  ✓ divide with multiple arguments returns correct result [line 51] (killed 6)
+  ✓ divide by zero throws error [line 55] (killed 2)
+  ✓ pow returns correct power [line 59] (killed 1)
+  ✓ sqrt returns correct square root [line 63] (killed 1)
+  ~ average with no arguments returns NaN [line 67] (covered 4)
+  ✓ average with arguments returns correct average [line 71] (killed 4)
+  ✓ abs returns absolute value [line 75] (killed 1)
+  ✓ negate returns negative value [line 79] (killed 2)
+  ✓ percent with one argument returns percentage [line 83] (killed 4)
+  ✓ percent with two arguments returns percentage of value [line 87] (killed 3)
+  ~ sum with negative numbers works correctly [line 91] (covered 6)
+  ~ subtract with negative numbers works correctly [line 95] (covered 10)
+  ~ multiply with negative numbers works correctly [line 99] (covered 6)
+  ~ divide with negative numbers works correctly [line 103] (covered 13)
+  ~ average with negative numbers works correctly [line 107] (covered 11)
+  ~ percent with zero returns zero [line 111] (covered 5)
+  ~ percent with zero as second argument returns zero [line 115] (covered 6)
+
+[Survived] ConditionalExpression
+src/calculator.js:2:7
+-     if (args.length === 0) return 0
++     if (false) return 0
+Tests ran:
+    adds 2 + 3 = 5
+    sum with no arguments returns 0
+    sum with one argument returns that argument
+  and 4 more tests!
+
+
+[Survived] ConditionalExpression
+src/calculator.js:18:7
+-     if (args.length === 0) return NaN
++     if (false) return NaN
+Tests ran:
+    divide with no arguments returns NaN
+    divide with one argument returns reciprocal
+    divide with multiple arguments returns correct result
+  and 2 more tests!
+
+
+[Survived] ConditionalExpression
+src/calculator.js:35:7
+-     if (args.length === 0) return NaN
++     if (false) return NaN
+Tests ran:
+    average with no arguments returns NaN
+    average with arguments returns correct average
+    average with negative numbers works correctly
+
+
+Ran 3.38 tests per mutant on average.
+---------------|------------------|----------|-----------|------------|----------|----------|
+               | % Mutation score |          |           |            |          |          |
+File           |  total | covered | # killed | # timeout | # survived | # no cov | # errors |
+---------------|--------|---------|----------|-----------|------------|----------|----------|
+All files      |  94.55 |   94.55 |       52 |         0 |          3 |        0 |        0 |
+ calculator.js |  94.55 |   94.55 |       52 |         0 |          3 |        0 |        0 |
+---------------|--------|---------|----------|-----------|------------|----------|----------|
+[32m16:08:09 (14496) INFO JsonReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.json
+[32m16:08:09 (14496) INFO HtmlReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.html
+[32m16:08:09 (14496) INFO MutationTestExecutor[39m Done in 5 seconds.
+[2026-02-16T15:08:09.954Z] 3 mutants survived. Sending to LLM...
+[2026-02-16T15:09:15.090Z] Tests updated.
+[2026-02-16T15:09:15.091Z] Process finished.

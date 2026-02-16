@@ -3,22 +3,57 @@ const path = require('path');
 const fs = require('fs');
 
 const appPath = path.join(__dirname, 'app');
+const logFilePath = path.join(__dirname, 'run.txt');
+const MAX_ITERATIONS = 3;
 
-function runStryker() {
+/* =========================
+   LOGGER
+========================= */
+
+function log(message) {
+  const timestamp = new Date().toISOString();
+  const formatted = `[${timestamp}] ${message}`;
+  console.log(formatted);
+  fs.appendFileSync(logFilePath, formatted + '\n', 'utf8');
+}
+
+/* =========================
+   EXEC WITH LOGGING
+========================= */
+
+function execWithLogging(command, cwd) {
   return new Promise((resolve, reject) => {
-    const child = exec('npx stryker run', { cwd: appPath });
+    const child = exec(command, { cwd });
 
-    child.stdout.pipe(process.stdout);
-    child.stderr.pipe(process.stderr);
+    child.stdout.on('data', (data) => {
+      process.stdout.write(data);
+      fs.appendFileSync(logFilePath, data);
+    });
+
+    child.stderr.on('data', (data) => {
+      process.stderr.write(data);
+      fs.appendFileSync(logFilePath, data);
+    });
 
     child.on('exit', (code) => {
-      if (code !== 0) {
-        reject(new Error(`Stryker exited with code ${code}`));
-      } else {
-        resolve();
-      }
+      if (code === 0) resolve();
+      else reject(new Error(`${command} exited with code ${code}`));
     });
   });
+}
+
+/* =========================
+   CORE OPERATIONS
+========================= */
+
+function runStryker() {
+  return execWithLogging('npx stryker run', appPath);
+}
+
+function runTests() {
+  return execWithLogging('npm test --silent', appPath)
+    .then(() => true)
+    .catch(() => false);
 }
 
 function loadData() {
@@ -47,7 +82,7 @@ function extractMutants(report) {
 
   for (const file of Object.values(report.files || {})) {
     for (const mutant of file.mutants || []) {
-      if (mutant.status === 'Survived' || mutant.status === 'Timeout') {
+      if (mutant.status === 'Survived' || mutant.status === 'Timeout' || mutant.status === 'NoCoverage') {
         mutants.push({
           status: mutant.status,
           replacement: mutant.replacement,
@@ -69,10 +104,8 @@ Return only the whole test file.
 STRICT RULES:
 - Do NOT use markdown.
 - Do NOT use triple backticks.
-- Do NOT include \`\`\`.
 - Do NOT explain anything.
-- Output must start directly with code.
-- Output must end directly with code.
+- Output must be raw JavaScript.
 
 --- SURVIVED MUTANTS ---
 ${JSON.stringify(mutants, null, 2)}
@@ -88,18 +121,23 @@ ${test}
 async function sendToLLM(prompt) {
   const response = await fetch('http://192.168.1.100:11434/api/generate', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'qwen3-coder:30b',
-      prompt: prompt,
+      prompt,
       stream: false
     })
   });
 
   const data = await response.json();
   return data.response;
+}
+
+function cleanLLMOutput(text) {
+  return text
+    .replace(/```[a-zA-Z]*\n?/g, '')
+    .replace(/```/g, '')
+    .trim();
 }
 
 function rewriteTestFile(newTestCode) {
@@ -110,55 +148,66 @@ function rewriteTestFile(newTestCode) {
   );
 }
 
-function runTests() {
-  return new Promise((resolve) => {
-    const child = exec('npm test --silent', { cwd: appPath });
+/* =========================
+   SINGLE ITERATION
+========================= */
 
-    child.stdout.pipe(process.stdout);
-    child.stderr.pipe(process.stderr);
+async function runIteration() {
+  log('Running tests...');
 
-    child.on('exit', (code) => {
-      resolve(code === 0);
-    });
-  });
-}
+  // const testsPass = await runTests();
 
-async function run() {
+  // if (!testsPass) {
+  //   log('Tests failed. Stopping iteration.');
+  //   return false;
+  // }
+
+  log('Running Stryker...');
   await runStryker();
 
   const { report, source, test } = loadData();
   const mutants = extractMutants(report);
 
   if (mutants.length === 0) {
-    console.log('No surviving mutants.');
-    return false; // tell main to stop
+    log('No surviving mutants.');
+    return false;
   }
 
-  console.log(`${mutants.length} mutants survived. Sending to LLM...`);
+  log(`${mutants.length} mutants survived. Sending to LLM...`);
 
   const prompt = buildPrompt(mutants, source, test);
   const result = await sendToLLM(prompt);
 
-  rewriteTestFile(result);
-  console.log('Tests updated.');
+  const cleaned = cleanLLMOutput(result);
+  rewriteTestFile(cleaned);
 
-  return true; // tell main to continue
+  log('Tests updated.');
+
+  return true;
 }
 
+/* =========================
+   MAIN LOOP
+========================= */
 
 async function main() {
-  for (let i = 1; i <= 3; i++) {
-    console.log(`\n===== ITERATION ${i} =====\n`);
+  fs.writeFileSync(logFilePath, '', 'utf8');
+  log('Starting mutation improvement process.');
 
-    const shouldContinue = await run();
+  for (let i = 1; i <= MAX_ITERATIONS; i++) {
+    log(`===== ITERATION ${i} =====`);
+
+    const shouldContinue = await runIteration();
 
     if (!shouldContinue) {
-      console.log('Stopping loop.');
+      log('Stopping loop.');
       break;
     }
   }
 
-  console.log('\nProcess finished.');
+  log('Process finished.');
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  log(`Fatal error: ${err.message}`);
+});
