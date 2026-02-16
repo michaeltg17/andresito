@@ -49,23 +49,9 @@ function extractMutants(report) {
 
 function buildPrompt(mutants, source, test) {
   return `
-You are a mutation testing expert.
 Your task is to check the provided mutants and create or modify the provided tests to kill them.
-You can also delete tests if there is duplication or whatever.
-
-Return ONLY valid JSON in this exact format:
-
-{
-  "calculator.js": "full updated source code",
-  "calculator.test.js": "full updated test code"
-}
-
-Rules:
-- Output must be valid JSON.
-- No explanations.
-- No markdown.
-- No backticks.
-- Always return complete files.
+You can also delete/combine/refactor tests for improvements.
+Return only the whole test file.
 
 --- SURVIVED MUTANTS ---
 ${JSON.stringify(mutants, null, 2)}
@@ -105,14 +91,6 @@ function rewriteFiles(llmResponse) {
   } catch (err) {
     console.error('LLM did not return valid JSON');
     return;
-  }
-
-  if (parsed['calculator.js']) {
-    fs.writeFileSync(
-      path.join(appPath, 'src/calculator.js'),
-      parsed['calculator.js'],
-      'utf8'
-    );
   }
 
   if (parsed['calculator.test.js']) {
