@@ -2,11 +2,24 @@ const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-// Run stryker inside app to generate json
 const appPath = path.join(__dirname, 'app');
-exec('npx stryker run', {
-  cwd: path.join(__dirname, 'app')
-});
+
+function runStryker() {
+  return new Promise((resolve, reject) => {
+    const child = exec('npx stryker run', { cwd: appPath });
+
+    child.stdout.pipe(process.stdout);
+    child.stderr.pipe(process.stderr);
+
+    child.on('exit', (code) => {
+      if (code !== 0) {
+        reject(new Error(`Stryker exited with code ${code}`));
+      } else {
+        resolve();
+      }
+    });
+  });
+}
 
 function loadData() {
   const report = JSON.parse(
@@ -53,6 +66,14 @@ Your task is to check the provided mutants and create or modify the provided tes
 You can also delete/combine/refactor tests for improvements.
 Return only the whole test file.
 
+STRICT RULES:
+- Do NOT use markdown.
+- Do NOT use triple backticks.
+- Do NOT include \`\`\`.
+- Do NOT explain anything.
+- Output must start directly with code.
+- Output must end directly with code.
+
 --- SURVIVED MUTANTS ---
 ${JSON.stringify(mutants, null, 2)}
 
@@ -81,37 +102,63 @@ async function sendToLLM(prompt) {
   return data.response;
 }
 
-function rewriteFiles(llmResponse) {
-  const appPath = path.join(__dirname, 'app');
-
-  let parsed;
-
-  try {
-    parsed = JSON.parse(llmResponse);
-  } catch (err) {
-    console.error('LLM did not return valid JSON');
-    return;
-  }
-
-  if (parsed['calculator.test.js']) {
-    fs.writeFileSync(
-      path.join(appPath, 'src/calculator.test.js'),
-      parsed['calculator.test.js'],
-      'utf8'
-    );
-  }
-
-  console.log('Files updated successfully.');
+function rewriteTestFile(newTestCode) {
+  fs.writeFileSync(
+    path.join(appPath, 'src/calculator.test.js'),
+    newTestCode,
+    'utf8'
+  );
 }
 
-async function main() {
+function runTests() {
+  return new Promise((resolve) => {
+    const child = exec('npm test --silent', { cwd: appPath });
+
+    child.stdout.pipe(process.stdout);
+    child.stderr.pipe(process.stderr);
+
+    child.on('exit', (code) => {
+      resolve(code === 0);
+    });
+  });
+}
+
+async function run() {
+  await runStryker();
+
   const { report, source, test } = loadData();
   const mutants = extractMutants(report);
-  const prompt = buildPrompt(mutants, source, test);
 
+  if (mutants.length === 0) {
+    console.log('No surviving mutants.');
+    return false; // tell main to stop
+  }
+
+  console.log(`${mutants.length} mutants survived. Sending to LLM...`);
+
+  const prompt = buildPrompt(mutants, source, test);
   const result = await sendToLLM(prompt);
 
-  rewriteFiles(result);
+  rewriteTestFile(result);
+  console.log('Tests updated.');
+
+  return true; // tell main to continue
 }
 
-main();
+
+async function main() {
+  for (let i = 1; i <= 3; i++) {
+    console.log(`\n===== ITERATION ${i} =====\n`);
+
+    const shouldContinue = await run();
+
+    if (!shouldContinue) {
+      console.log('Stopping loop.');
+      break;
+    }
+  }
+
+  console.log('\nProcess finished.');
+}
+
+main().catch(console.error);
