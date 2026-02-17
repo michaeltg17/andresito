@@ -1,13 +1,13 @@
-[2026-02-16T15:06:08.021Z] Starting mutation improvement process.
-[2026-02-16T15:06:08.025Z] ===== ITERATION 1 =====
-[2026-02-16T15:06:08.025Z] Running tests...
-[2026-02-16T15:06:08.026Z] Running Stryker...
-[32m16:06:09 (5584) INFO ProjectReader[39m Found 1 of 20 file(s) to be mutated.
-[32m16:06:09 (5584) INFO Instrumenter[39m Instrumented 1 source file(s) with 55 mutant(s)
-[32m16:06:09 (5584) INFO ConcurrencyTokenProvider[39m Creating 11 test runner process(es).
-[32m16:06:10 (5584) INFO BroadcastReporter[39m Detected that current console does not support the "progress" reporter, downgrading to "progress-append-only" reporter
-[32m16:06:10 (5584) INFO DryRunExecutor[39m Starting initial test run (jest test runner with "perTest" coverage analysis). This may take a while.
-[32m16:06:11 (5584) INFO DryRunExecutor[39m Initial test run succeeded. Ran 1 tests in 0 seconds (net 1 ms, overhead 694 ms).
+[2026-02-17T12:48:19.453Z] Starting mutation improvement process.
+[2026-02-17T12:48:19.457Z] ===== ITERATION 1 =====
+[2026-02-17T12:48:19.457Z] Running tests...
+[2026-02-17T12:48:19.457Z] Running Stryker...
+[32m13:48:21 (10260) INFO ProjectReader[39m Found 1 of 20 file(s) to be mutated.
+[32m13:48:21 (10260) INFO Instrumenter[39m Instrumented 1 source file(s) with 55 mutant(s)
+[32m13:48:21 (10260) INFO ConcurrencyTokenProvider[39m Creating 11 test runner process(es).
+[32m13:48:21 (10260) INFO BroadcastReporter[39m Detected that current console does not support the "progress" reporter, downgrading to "progress-append-only" reporter
+[32m13:48:21 (10260) INFO DryRunExecutor[39m Starting initial test run (jest test runner with "perTest" coverage analysis). This may take a while.
+[32m13:48:22 (10260) INFO DryRunExecutor[39m Initial test run succeeded. Ran 1 tests in 0 seconds (net 2 ms, overhead 707 ms).
 
 All tests/calculator.test.js
   ✓ adds 2 + 3 = 5 [line 3] (killed 5)
@@ -304,44 +304,44 @@ File           |  total | covered | # killed | # timeout | # survived | # no cov
 All files      |   9.09 |   83.33 |        5 |         0 |          1 |       49 |        0 |
  calculator.js |   9.09 |   83.33 |        5 |         0 |          1 |       49 |        0 |
 ---------------|--------|---------|----------|-----------|------------|----------|----------|
-[32m16:06:12 (5584) INFO JsonReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.json
-[32m16:06:12 (5584) INFO HtmlReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.html
-[32m16:06:12 (5584) INFO MutationTestExecutor[39m Done in 2 seconds.
-[2026-02-16T15:06:13.058Z] 1 mutants survived. Sending to LLM...
-[2026-02-16T15:06:57.384Z] Tests updated.
-[2026-02-16T15:06:57.385Z] ===== ITERATION 2 =====
-[2026-02-16T15:06:57.386Z] Running tests...
-[2026-02-16T15:06:57.387Z] Running Stryker...
-[32m16:06:58 (18828) INFO ProjectReader[39m Found 1 of 20 file(s) to be mutated.
-[32m16:06:59 (18828) INFO Instrumenter[39m Instrumented 1 source file(s) with 55 mutant(s)
-[32m16:06:59 (18828) INFO ConcurrencyTokenProvider[39m Creating 11 test runner process(es).
-[32m16:06:59 (18828) INFO BroadcastReporter[39m Detected that current console does not support the "progress" reporter, downgrading to "progress-append-only" reporter
-[32m16:06:59 (18828) INFO DryRunExecutor[39m Starting initial test run (jest test runner with "perTest" coverage analysis). This may take a while.
-[32m16:07:00 (18828) INFO DryRunExecutor[39m Initial test run succeeded. Ran 22 tests in 0 seconds (net 9 ms, overhead 720 ms).
+[32m13:48:23 (10260) INFO JsonReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.json
+[32m13:48:23 (10260) INFO HtmlReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.html
+[32m13:48:23 (10260) INFO MutationTestExecutor[39m Done in 2 seconds.
+[2026-02-17T12:48:24.475Z] 50 mutants survived. Sending to LLM...
+[2026-02-17T12:50:30.953Z] Tests updated.
+[2026-02-17T12:50:30.954Z] ===== ITERATION 2 =====
+[2026-02-17T12:50:30.954Z] Running tests...
+[2026-02-17T12:50:30.955Z] Running Stryker...
+[32m13:50:32 (21532) INFO ProjectReader[39m Found 1 of 20 file(s) to be mutated.
+[32m13:50:32 (21532) INFO Instrumenter[39m Instrumented 1 source file(s) with 55 mutant(s)
+[32m13:50:32 (21532) INFO ConcurrencyTokenProvider[39m Creating 11 test runner process(es).
+[32m13:50:33 (21532) INFO BroadcastReporter[39m Detected that current console does not support the "progress" reporter, downgrading to "progress-append-only" reporter
+[32m13:50:33 (21532) INFO DryRunExecutor[39m Starting initial test run (jest test runner with "perTest" coverage analysis). This may take a while.
+[32m13:50:34 (21532) INFO DryRunExecutor[39m Initial test run succeeded. Ran 22 tests in 0 seconds (net 8 ms, overhead 740 ms).
 
 All tests/calculator.test.js
   ✓ adds 2 + 3 = 5 [line 3] (killed 5)
   ~ sum with no arguments returns 0 [line 7] (covered 4)
   ~ sum with one argument returns that argument [line 11] (covered 6)
-  ~ sum with multiple arguments returns correct sum [line 15] (covered 6)
+  ~ sum with multiple arguments [line 15] (covered 6)
   ✓ subtract with no arguments returns 0 [line 19] (killed 3)
   ✓ subtract with one argument returns negative of that argument [line 23] (killed 4)
-  ✓ subtract with multiple arguments returns correct result [line 27] (killed 4)
+  ✓ subtract with multiple arguments [line 27] (killed 4)
   ✓ multiply with no arguments returns 0 [line 31] (killed 3)
   ✓ multiply with one argument returns that argument [line 35] (killed 3)
-  ~ multiply with multiple arguments returns correct product [line 39] (covered 6)
+  ~ multiply with multiple arguments [line 39] (covered 6)
   ~ divide with no arguments returns NaN [line 43] (covered 4)
-  ✓ divide with one argument returns reciprocal [line 47] (killed 6)
-  ✓ divide with multiple arguments returns correct result [line 51] (killed 6)
+  ✓ divide with one argument returns 1 divided by that argument [line 47] (killed 6)
+  ✓ divide with multiple arguments [line 51] (killed 6)
   ✓ divide by zero throws error [line 55] (killed 2)
-  ✓ pow returns correct power [line 59] (killed 1)
-  ✓ sqrt returns correct square root [line 63] (killed 1)
+  ✓ pow function works correctly [line 59] (killed 1)
+  ✓ sqrt function works correctly [line 63] (killed 1)
   ~ average with no arguments returns NaN [line 67] (covered 4)
-  ✓ average with arguments returns correct average [line 71] (killed 4)
-  ✓ abs returns absolute value [line 75] (killed 1)
-  ✓ negate returns negative value [line 79] (killed 2)
-  ✓ percent with one argument returns percentage [line 83] (killed 4)
-  ✓ percent with two arguments returns percentage of value [line 87] (killed 3)
+  ✓ average with arguments [line 71] (killed 4)
+  ✓ abs function works correctly [line 75] (killed 1)
+  ✓ negate function works correctly [line 79] (killed 2)
+  ✓ percent with one argument returns value divided by 100 [line 83] (killed 4)
+  ✓ percent with two arguments returns percentage of the second argument [line 87] (killed 3)
 
 [Survived] ConditionalExpression
 src/calculator.js:2:7
@@ -360,8 +360,8 @@ src/calculator.js:18:7
 +     if (false) return NaN
 Tests ran:
     divide with no arguments returns NaN
-    divide with one argument returns reciprocal
-    divide with multiple arguments returns correct result
+    divide with one argument returns 1 divided by that argument
+    divide with multiple arguments
   and 1 more test!
 
 
@@ -371,7 +371,7 @@ src/calculator.js:35:7
 +     if (false) return NaN
 Tests ran:
     average with no arguments returns NaN
-    average with arguments returns correct average
+    average with arguments
 
 
 Ran 2.35 tests per mutant on average.
@@ -382,51 +382,49 @@ File           |  total | covered | # killed | # timeout | # survived | # no cov
 All files      |  94.55 |   94.55 |       52 |         0 |          3 |        0 |        0 |
  calculator.js |  94.55 |   94.55 |       52 |         0 |          3 |        0 |        0 |
 ---------------|--------|---------|----------|-----------|------------|----------|----------|
-[32m16:07:04 (18828) INFO JsonReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.json
-[32m16:07:04 (18828) INFO HtmlReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.html
-[32m16:07:04 (18828) INFO MutationTestExecutor[39m Done in 5 seconds.
-[2026-02-16T15:07:04.477Z] 3 mutants survived. Sending to LLM...
-[2026-02-16T15:08:02.721Z] Tests updated.
-[2026-02-16T15:08:02.722Z] ===== ITERATION 3 =====
-[2026-02-16T15:08:02.723Z] Running tests...
-[2026-02-16T15:08:02.723Z] Running Stryker...
-[32m16:08:04 (14496) INFO ProjectReader[39m Found 1 of 20 file(s) to be mutated.
-[32m16:08:04 (14496) INFO Instrumenter[39m Instrumented 1 source file(s) with 55 mutant(s)
-[32m16:08:04 (14496) INFO ConcurrencyTokenProvider[39m Creating 11 test runner process(es).
-[32m16:08:05 (14496) INFO BroadcastReporter[39m Detected that current console does not support the "progress" reporter, downgrading to "progress-append-only" reporter
-[32m16:08:05 (14496) INFO DryRunExecutor[39m Starting initial test run (jest test runner with "perTest" coverage analysis). This may take a while.
-[32m16:08:06 (14496) INFO DryRunExecutor[39m Initial test run succeeded. Ran 29 tests in 0 seconds (net 12 ms, overhead 715 ms).
+[32m13:50:38 (21532) INFO JsonReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.json
+[32m13:50:38 (21532) INFO HtmlReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.html
+[32m13:50:38 (21532) INFO MutationTestExecutor[39m Done in 5 seconds.
+[2026-02-17T12:50:38.409Z] 3 mutants survived. Sending to LLM...
+[2026-02-17T12:51:57.288Z] Tests updated.
+[2026-02-17T12:51:57.288Z] ===== ITERATION 3 =====
+[2026-02-17T12:51:57.289Z] Running tests...
+[2026-02-17T12:51:57.289Z] Running Stryker...
+[32m13:51:58 (23792) INFO ProjectReader[39m Found 1 of 20 file(s) to be mutated.
+[32m13:51:58 (23792) INFO Instrumenter[39m Instrumented 1 source file(s) with 55 mutant(s)
+[32m13:51:59 (23792) INFO ConcurrencyTokenProvider[39m Creating 11 test runner process(es).
+[32m13:51:59 (23792) INFO BroadcastReporter[39m Detected that current console does not support the "progress" reporter, downgrading to "progress-append-only" reporter
+[32m13:51:59 (23792) INFO DryRunExecutor[39m Starting initial test run (jest test runner with "perTest" coverage analysis). This may take a while.
+[32m13:52:00 (23792) INFO DryRunExecutor[39m Initial test run succeeded. Ran 27 tests in 0 seconds (net 14 ms, overhead 701 ms).
 
 All tests/calculator.test.js
   ✓ adds 2 + 3 = 5 [line 3] (killed 5)
   ~ sum with no arguments returns 0 [line 7] (covered 4)
   ~ sum with one argument returns that argument [line 11] (covered 6)
-  ~ sum with multiple arguments returns correct sum [line 15] (covered 6)
+  ~ sum with multiple arguments [line 15] (covered 6)
   ✓ subtract with no arguments returns 0 [line 19] (killed 3)
   ✓ subtract with one argument returns negative of that argument [line 23] (killed 4)
-  ✓ subtract with multiple arguments returns correct result [line 27] (killed 4)
+  ✓ subtract with multiple arguments [line 27] (killed 4)
   ✓ multiply with no arguments returns 0 [line 31] (killed 3)
   ✓ multiply with one argument returns that argument [line 35] (killed 3)
-  ~ multiply with multiple arguments returns correct product [line 39] (covered 6)
+  ~ multiply with multiple arguments [line 39] (covered 6)
   ~ divide with no arguments returns NaN [line 43] (covered 4)
-  ✓ divide with one argument returns reciprocal [line 47] (killed 6)
-  ✓ divide with multiple arguments returns correct result [line 51] (killed 6)
+  ✓ divide with one argument returns 1 divided by that argument [line 47] (killed 6)
+  ✓ divide with multiple arguments [line 51] (killed 6)
   ✓ divide by zero throws error [line 55] (killed 2)
-  ✓ pow returns correct power [line 59] (killed 1)
-  ✓ sqrt returns correct square root [line 63] (killed 1)
+  ✓ pow function works correctly [line 59] (killed 1)
+  ✓ sqrt function works correctly [line 63] (killed 1)
   ~ average with no arguments returns NaN [line 67] (covered 4)
-  ✓ average with arguments returns correct average [line 71] (killed 4)
-  ✓ abs returns absolute value [line 75] (killed 1)
-  ✓ negate returns negative value [line 79] (killed 2)
-  ✓ percent with one argument returns percentage [line 83] (killed 4)
-  ✓ percent with two arguments returns percentage of value [line 87] (killed 3)
-  ~ sum with negative numbers works correctly [line 91] (covered 6)
-  ~ subtract with negative numbers works correctly [line 95] (covered 10)
-  ~ multiply with negative numbers works correctly [line 99] (covered 6)
-  ~ divide with negative numbers works correctly [line 103] (covered 13)
-  ~ average with negative numbers works correctly [line 107] (covered 11)
-  ~ percent with zero returns zero [line 111] (covered 5)
-  ~ percent with zero as second argument returns zero [line 115] (covered 6)
+  ✓ average with arguments [line 71] (killed 4)
+  ✓ abs function works correctly [line 75] (killed 1)
+  ✓ negate function works correctly [line 79] (killed 2)
+  ✓ percent with one argument returns value divided by 100 [line 83] (killed 4)
+  ✓ percent with two arguments returns percentage of the second argument [line 87] (killed 3)
+  ~ subtract with negative numbers [line 91] (covered 10)
+  ~ multiply with negative numbers [line 95] (covered 6)
+  ~ divide with negative numbers [line 99] (covered 13)
+  ~ average with negative numbers [line 103] (covered 11)
+  ~ percent with negative numbers [line 107] (covered 6)
 
 [Survived] ConditionalExpression
 src/calculator.js:2:7
@@ -436,7 +434,7 @@ Tests ran:
     adds 2 + 3 = 5
     sum with no arguments returns 0
     sum with one argument returns that argument
-  and 4 more tests!
+  and 3 more tests!
 
 
 [Survived] ConditionalExpression
@@ -445,8 +443,8 @@ src/calculator.js:18:7
 +     if (false) return NaN
 Tests ran:
     divide with no arguments returns NaN
-    divide with one argument returns reciprocal
-    divide with multiple arguments returns correct result
+    divide with one argument returns 1 divided by that argument
+    divide with multiple arguments
   and 2 more tests!
 
 
@@ -456,11 +454,11 @@ src/calculator.js:35:7
 +     if (false) return NaN
 Tests ran:
     average with no arguments returns NaN
-    average with arguments returns correct average
-    average with negative numbers works correctly
+    average with arguments
+    average with negative numbers
 
 
-Ran 3.38 tests per mutant on average.
+Ran 3.18 tests per mutant on average.
 ---------------|------------------|----------|-----------|------------|----------|----------|
                | % Mutation score |          |           |            |          |          |
 File           |  total | covered | # killed | # timeout | # survived | # no cov | # errors |
@@ -468,9 +466,9 @@ File           |  total | covered | # killed | # timeout | # survived | # no cov
 All files      |  94.55 |   94.55 |       52 |         0 |          3 |        0 |        0 |
  calculator.js |  94.55 |   94.55 |       52 |         0 |          3 |        0 |        0 |
 ---------------|--------|---------|----------|-----------|------------|----------|----------|
-[32m16:08:09 (14496) INFO JsonReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.json
-[32m16:08:09 (14496) INFO HtmlReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.html
-[32m16:08:09 (14496) INFO MutationTestExecutor[39m Done in 5 seconds.
-[2026-02-16T15:08:09.954Z] 3 mutants survived. Sending to LLM...
-[2026-02-16T15:09:15.090Z] Tests updated.
-[2026-02-16T15:09:15.091Z] Process finished.
+[32m13:52:04 (23792) INFO JsonReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.json
+[32m13:52:04 (23792) INFO HtmlReporter[39m Your report can be found at: file:///E:/r/andresito/app/reports/mutation/mutation.html
+[32m13:52:04 (23792) INFO MutationTestExecutor[39m Done in 5 seconds.
+[2026-02-17T12:52:04.369Z] Same surviving mutants as previous iteration. Likely equivalent mutants.
+[2026-02-17T12:52:04.369Z] Stopping loop.
+[2026-02-17T12:52:04.370Z] Process finished.

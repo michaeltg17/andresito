@@ -5,6 +5,7 @@ const fs = require('fs');
 const appPath = path.join(__dirname, 'app');
 const logFilePath = path.join(__dirname, 'run.txt');
 const MAX_ITERATIONS = 3;
+let previousMutantIds = null;
 
 /* =========================
    LOGGER
@@ -80,10 +81,23 @@ function loadData() {
 function extractMutants(report) {
   const mutants = [];
 
-  for (const file of Object.values(report.files || {})) {
+  for (const [filePath, file] of Object.entries(report.files || {})) {
     for (const mutant of file.mutants || []) {
-      if (mutant.status === 'Survived' || mutant.status === 'Timeout' || mutant.status === 'NoCoverage') {
+      if (
+        mutant.status === 'Survived' ||
+        mutant.status === 'Timeout' ||
+        mutant.status === 'NoCoverage'
+      ) {
+        const id = [
+          filePath,
+          mutant.location?.start?.line,
+          mutant.location?.start?.column,
+          mutant.replacement
+        ].join(':');
+
         mutants.push({
+          id,
+          filePath,
           status: mutant.status,
           replacement: mutant.replacement,
           location: mutant.location
@@ -95,20 +109,41 @@ function extractMutants(report) {
   return mutants;
 }
 
+function areSameMutants(prevIds, currentMutants) {
+  if (!prevIds) return false;
+
+  const currentIds = currentMutants.map(m => m.id).sort();
+  const prevSorted = [...prevIds].sort();
+
+  if (currentIds.length !== prevSorted.length) return false;
+
+  return currentIds.every((id, index) => id === prevSorted[index]);
+}
+
 function buildPrompt(mutants, source, test) {
   return `
-Your task is to check the provided mutants and create or modify the provided tests to kill them.
-You can also delete/combine/refactor tests for improvements.
-Return only the whole test file.
+You are a mutation testing code generator.
 
-STRICT RULES:
-- Do NOT use markdown.
-- Do NOT use triple backticks.
-- Do NOT explain anything.
-- Output must be raw JavaScript.
+You must respond with VALID JSON ONLY.
+
+Format:
+{
+  "testFile": "<FULL JAVASCRIPT TEST FILE CONTENT>"
+}
+
+Hard Rules:
+- Output must be valid JSON.
+- No markdown.
+- No explanations.
+- No comments outside testFile.
+- No extra keys.
+- No text before or after JSON.
+- testFile must contain only raw JavaScript.
+
+If you violate these rules, the response will be rejected.
 
 --- SURVIVED MUTANTS ---
-${JSON.stringify(mutants, null, 2)}
+${JSON.stringify(mutants)}
 
 --- SOURCE CODE ---
 ${source}
@@ -117,6 +152,17 @@ ${source}
 ${test}
 `;
 }
+
+function parseLLMResponse(text) {
+  try {
+    const parsed = JSON.parse(text);
+    if (!parsed.testFile) throw new Error('Missing testFile');
+    return parsed.testFile;
+  } catch (err) {
+    throw new Error('Invalid LLM JSON output');
+  }
+}
+
 
 async function sendToLLM(prompt) {
   const response = await fetch('http://192.168.1.100:11434/api/generate', {
@@ -130,7 +176,7 @@ async function sendToLLM(prompt) {
   });
 
   const data = await response.json();
-  return data.response;
+  return parseLLMResponse(data.response);
 }
 
 function cleanLLMOutput(text) {
@@ -173,6 +219,11 @@ async function runIteration() {
     return false;
   }
 
+  if (areSameMutants(previousMutantIds, mutants)) {
+    log('Same surviving mutants as previous iteration. Likely equivalent mutants.');
+    return false;
+  }
+
   log(`${mutants.length} mutants survived. Sending to LLM...`);
 
   const prompt = buildPrompt(mutants, source, test);
@@ -180,9 +231,9 @@ async function runIteration() {
 
   const cleaned = cleanLLMOutput(result);
   rewriteTestFile(cleaned);
+  previousMutantIds = mutants.map(m => m.id);
 
   log('Tests updated.');
-
   return true;
 }
 
