@@ -194,6 +194,63 @@ function rewriteTestFile(newTestCode) {
   );
 }
 
+function buildCleanupPrompt(test) {
+  return `
+You are a test suite optimizer.
+
+You must respond with VALID JSON ONLY.
+
+Format:
+{
+  "testFile": "<FULL JAVASCRIPT TEST FILE CONTENT>"
+}
+
+Hard Rules:
+- Remove duplicated or useless tests.
+- Do NOT reduce mutation effectiveness.
+- Keep behavior coverage identical.
+- Output valid JSON only.
+- No markdown.
+- No explanations.
+- No extra keys.
+- No text before or after JSON.
+
+--- CURRENT TEST FILE ---
+${test}
+`;
+}
+
+async function runCleanupPhase() {
+  log('Starting post-optimization cleanup phase...');
+
+  const testPath = path.join(appPath, 'src/calculator.test.js');
+  const originalTest = fs.readFileSync(testPath, 'utf8');
+
+  const baselineMutants = getCurrentMutantIds();
+
+  const prompt = buildCleanupPrompt(originalTest);
+  const cleanedTest = await sendToLLM(prompt);
+
+  rewriteTestFile(cleanedTest);
+
+  log('Re-running Stryker after cleanup...');
+  await runStryker();
+
+  const newMutants = getCurrentMutantIds();
+
+  const same =
+    baselineMutants.length === newMutants.length &&
+    baselineMutants.every((id, i) => id === newMutants[i]);
+
+  if (!same) {
+    log('Cleanup changed mutation result. Reverting.');
+    rewriteTestFile(originalTest);
+    await runStryker();
+  } else {
+    log('Cleanup successful. Mutation result unchanged.');
+  }
+}
+
 /* =========================
    SINGLE ITERATION
 ========================= */
@@ -255,6 +312,8 @@ async function main() {
       break;
     }
   }
+
+  await runCleanupPhase();
 
   log('Process finished.');
 }
