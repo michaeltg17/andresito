@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest'
 import { sum } from './calculator'
 
 test('adds 2 + 3 = 5', () => {

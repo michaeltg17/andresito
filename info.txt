@@ -1,2 +1,0 @@
-Improvements:
-- Recieve back also the source code with suggestions, improvements or detected bugs
