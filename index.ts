@@ -3,26 +3,17 @@ import { execSync } from "child_process";
 
 const filePath = "app/src/calculator.js";
 const sourceCode = fs.readFileSync(filePath, "utf-8");
-
-// 🔥 Limit context (VERY important for GGUF)
-const limitedSource = sourceCode.split("\n").slice(0, 200).join("\n");
+const testCode = fs.readFileSync("app/src/calculator.test.js", "utf-8");
 
 const prompt = `
-You are performing mutation testing.
+Test file:
+${testCode}
 
-Change EXACTLY ONE line in the code to break its tests.
+Source file:
+${sourceCode}
 
-RULES:
-- Modify only ONE existing line
-- Do NOT add or remove lines
-- Do NOT explain anything
-- Output ONLY in this format:
-
-LINE: <number>
-CODE: <new line>
-
-Code:
-${limitedSource}
+Mutate the source code in a small way that should break the test.
+Return ONLY the full modified source file, nothing else, no markdown.
 `;
 
 interface LlamaRequest {
@@ -35,17 +26,18 @@ interface LlamaRequest {
 
 interface LlamaResponse {
   choices?: Array<{
-    delta?: { content?: string };
+    delta?: { content?: string; reasoning_content?: string };
     text?: string;
-    message?: { content?: string };
+    message?: { content?: string; reasoning_content?: string };
   }>;
 }
 
 async function callLlamaStream(): Promise<string> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
+  const timeout = setTimeout(() => controller.abort(), 180000);
 
   let fullText = "";
+  let reasoningText = "";
 
   try {
     const res = await fetch("http://localhost:8080/v1/chat/completions", {
@@ -58,19 +50,21 @@ async function callLlamaStream(): Promise<string> {
         model: "Qwen3.5-27B-UD-Q4_K_XL.gguf",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.2,
-        max_tokens: 200,
+        max_tokens: 2048,
         stream: true,
       } as LlamaRequest),
     });
 
-    if (!res.body) throw new Error("No body");
+    console.log(`📡 Response status: ${res.status} ${res.statusText}`);
+
+    if (!res.body) throw new Error("No body in response");
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
 
     let buffer = "";
 
-    console.log("📡 Streaming response:\n");
+    console.log("📡 Streaming response (reasoning):\n");
 
     while (true) {
       const { done, value } = await reader.read();
@@ -78,15 +72,12 @@ async function callLlamaStream(): Promise<string> {
 
       const chunk = decoder.decode(value, { stream: true });
 
-      // 🔍 DEBUG: see raw chunks (llama.cpp can be weird)
-      // console.log("\n🧩 RAW CHUNK:\n", chunk);
-
       buffer += chunk;
 
       const lines = buffer.split("\n");
       buffer = lines.pop() || "";
 
-      for (const line of lines) {
+      for ( const line of lines) {
         if (!line.startsWith("data:")) continue;
 
         const data = line.replace("data:", "").trim();
@@ -96,16 +87,26 @@ async function callLlamaStream(): Promise<string> {
         try {
           const json = JSON.parse(data) as LlamaResponse;
 
-          // 🔥 Support ALL llama.cpp variants
-          const token =
-            json.choices?.[0]?.delta?.content ??
-            json.choices?.[0]?.text ??
-            json.choices?.[0]?.message?.content ??
+          // 🔥 For reasoning models, separate reasoning_content from content
+          const reasoningToken =
+            json.choices?.[0]?.delta?.reasoning_content ??
+            json.choices?.[0]?.message?.reasoning_content ??
             "";
 
-          if (token) {
-            process.stdout.write(token);
-            fullText += token;
+          const contentToken =
+            json.choices?.[0]?.delta?.content ??
+            json.choices?.[0]?.message?.content ??
+            json.choices?.[0]?.text ??
+            "";
+
+          if (reasoningToken) {
+            process.stdout.write(reasoningToken);
+            reasoningText += reasoningToken;
+          }
+
+          if (contentToken) {
+            process.stdout.write(contentToken);
+            fullText += contentToken;
           }
         } catch {
           // ignore broken partial JSON
@@ -115,13 +116,21 @@ async function callLlamaStream(): Promise<string> {
 
     clearTimeout(timeout);
 
-    if (!fullText.trim()) {
-      throw new Error("Empty stream");
+    // For reasoning models, the actual answer is in content, not reasoning_content
+    if (fullText.trim()) {
+      return fullText;
     }
 
-    return fullText;
+    // Fallback: if no content, return reasoning (some models use this differently)
+    if (reasoningText.trim()) {
+      console.log("\n⚠️ No content field, using reasoning as fallback");
+      return reasoningText;
+    }
+
+    throw new Error("Empty stream");
   } catch (err) {
-    console.log("\n⚠️ Streaming failed, falling back...\n");
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.log(`\n⚠️ Streaming failed: ${errorMsg}, falling back...\n`);
     clearTimeout(timeout);
     return await callLlamaOnce();
   }
@@ -129,6 +138,8 @@ async function callLlamaStream(): Promise<string> {
 
 // ✅ Non-stream fallback (VERY important)
 async function callLlamaOnce(): Promise<string> {
+  console.log("🔄 Attempting non-streaming request...\n");
+  
   const res = await fetch("http://localhost:8080/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -138,53 +149,83 @@ async function callLlamaOnce(): Promise<string> {
       model: "Qwen3.5-27B-UD-Q4_K_XL.gguf",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.2,
-      max_tokens: 200,
+      max_tokens: 1024,
       stream: false,
     } as LlamaRequest),
   });
 
-  const data = await res.json() as LlamaResponse;
+  console.log(`📡 Non-stream response status: ${res.status} ${res.statusText}`);
 
-  return (
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.log(`❌ Error response body: ${errorText}`);
+    throw new Error(`HTTP ${res.status}: ${errorText}`);
+  }
+
+  const data = await res.json() as LlamaResponse;
+  
+  console.log("📥 Raw response data:", JSON.stringify(data, null, 2));
+
+  // 🔥 For reasoning models: prefer content over reasoning_content
+  const content =
     data.choices?.[0]?.message?.content ||
     data.choices?.[0]?.text ||
-    ""
-  );
+    "";
+  
+  const reasoningContent = data.choices?.[0]?.message?.reasoning_content || "";
+
+  if (!content || !content.trim()) {
+    console.log("⚠️ Warning: Empty content from non-streaming response");
+    console.log("🔍 Checking finish_reason:", data.choices?.[0]?.finish_reason);
+    if (reasoningContent) {
+      console.log("🔍 Using reasoning_content as fallback (length:", reasoningContent.length, ")");
+      return reasoningContent;
+    }
+  }
+  
+  return content;
 }
 
-interface MutationResult {
-  lineNumber: number;
-  newLine: string;
-}
-
-function parseMutation(text: string): MutationResult {
-  const lineMatch = text.match(/LINE:\s*(\d+)/i);
-  const codeMatch = text.match(/CODE:\s*([^\n]+)/i);
-
-  if (!lineMatch || !codeMatch) {
-    throw new Error("Failed to parse:\n" + text);
+function parseFullSource(text: string): string {
+  const trimmedText = text.trim();
+  
+  if (!trimmedText) {
+    throw new Error("Empty response from LLM");
   }
 
-  return {
-    lineNumber: Number(lineMatch[1]),
-    newLine: codeMatch[1],
-  };
-}
-
-function applyMutation(lineNumber: number, newLine: string): void {
-  const lines = sourceCode.split("\n");
-
-  if (lineNumber < 1 || lineNumber > lines.length) {
-    throw new Error("Invalid line number");
+  // Try to extract code from markdown code blocks first
+  const codeBlockMatch = trimmedText.match(/```(?:javascript|js)?\n([\s\S]*?)\n```/);
+  if (codeBlockMatch) {
+    return codeBlockMatch[1].trim();
   }
 
-  console.log("\n🔍 Diff:");
-  console.log(`- ${lines[lineNumber - 1]}`);
-  console.log(`+ ${newLine}`);
+  // If no markdown block, use the entire response as the source code
+  return trimmedText;
+}
 
-  lines[lineNumber - 1] = newLine;
+function applyFullSource(newSource: string): void {
+  const oldLines = sourceCode.split("\n");
+  const newLines = newSource.split("\n");
 
-  fs.writeFileSync(filePath, lines.join("\n"));
+  console.log("\n🔍 Changes:");
+  
+  // Show a diff-like comparison
+  const maxLines = Math.max(oldLines.length, newLines.length);
+  for (let i = 0; i < maxLines; i++) {
+    const oldLine = oldLines[i] ?? "<deleted>";
+    const newLine = newLines[i] ?? "<added>";
+    
+    if (oldLine !== newLine) {
+      if (oldLine !== "<deleted>") {
+        console.log(`- ${oldLine}`);
+      }
+      if (newLine !== "<added>") {
+        console.log(`+ ${newLine}`);
+      }
+    }
+  }
+
+  fs.writeFileSync(filePath, newSource);
 }
 
 function runTests(): boolean {
@@ -208,12 +249,11 @@ async function main(): Promise<void> {
 
   console.log("\n\n🧠 Final output:\n", output);
 
-  const { lineNumber, newLine } = parseMutation(output);
+  const newSource = parseFullSource(output);
 
-  console.log(`\n✏️ Applying mutation at line ${lineNumber}`);
-  console.log(`➡️ ${newLine}`);
+  console.log("\n✏️ Applying full source mutation");
 
-  applyMutation(lineNumber, newLine);
+  applyFullSource(newSource);
 
   const passed = runTests();
 
