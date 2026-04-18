@@ -9,7 +9,7 @@ ${testCode}
 Source file:
 ${sourceCode}
 
-Generate all possible mutations of the source code.
+Generate mutations of the source code that should break the tests.
 Code must compile.
 Each mutation should be a small change.
 Return ONLY a valid JSON object with this exact structure:
