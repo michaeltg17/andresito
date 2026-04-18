@@ -1,7 +1,7 @@
 import fs from "fs";
 import { execSync } from "child_process";
 
-import { MutationResult, LLMMutation } from "../interfaces";
+import { MutationResult, LLMMutation } from "../interfaces/index";
 
 const filePath = "app/src/calculator.js";
 const originalSourceCode = fs.readFileSync(filePath, "utf-8");

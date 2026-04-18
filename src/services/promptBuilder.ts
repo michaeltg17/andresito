@@ -9,7 +9,9 @@ ${testCode}
 Source file:
 ${sourceCode}
 
-Generate multiple mutations of the source code that should break the tests.
+Generate all possible mutations of the source code.
+Code must compile.
+Each mutation should be a small change.
 Return ONLY a valid JSON object with this exact structure:
 {
   "mutations": [
@@ -20,8 +22,5 @@ Return ONLY a valid JSON object with this exact structure:
     ... more mutations
   ]
 }
-
-Code must compile.
-Each mutation should be a small change that might break tests.
 `;
 }

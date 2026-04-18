@@ -13,6 +13,13 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+    "compilerOptions": {
+      "module": "ESNext"
+    }
+  },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "app", "dist"]
 }

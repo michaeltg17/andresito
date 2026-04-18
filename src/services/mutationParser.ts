@@ -1,4 +1,4 @@
-import { LLMMutation, LLMResponse } from "../interfaces";
+import { LLMMutation, LLMResponse } from "../interfaces/index";
 
 // Parse LLM response to extract mutations
 export function parseMutations(text: string): LLMMutation[] {

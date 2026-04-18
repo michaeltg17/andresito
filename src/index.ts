@@ -1,5 +1,5 @@
 import fs from "fs";
-import { MutationResult } from "./interfaces";
+import { MutationResult } from "./interfaces/index";
 import { runMutation } from "./services/mutationRunner";
 import { callLlamaStream } from "./services/llamaService";
 import { buildPrompt } from "./services/promptBuilder";

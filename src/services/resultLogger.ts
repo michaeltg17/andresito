@@ -1,4 +1,4 @@
-import { MutationResult } from "../interfaces";
+import { MutationResult } from "../interfaces/index";
 
 /**
  * Calculates mutation statistics from the results array

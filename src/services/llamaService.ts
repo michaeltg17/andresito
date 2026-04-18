@@ -1,11 +1,11 @@
-import { LlamaRequest, LlamaResponse } from "../interfaces";
+import { LlamaRequest, LlamaResponse } from "../interfaces/index";
 
 /**
  * Makes a streaming request to the Llama API
  */
 export async function callLlamaStream(prompt: string): Promise<string> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 500000);
+  const timeout = setTimeout(() => controller.abort(), 180000);
 
   let fullText = "";
   let reasoningText = "";
@@ -21,7 +21,6 @@ export async function callLlamaStream(prompt: string): Promise<string> {
         model: "Qwen3.5-27B-UD-Q4_K_XL.gguf",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.2,
-        max_tokens: 2048,
         stream: true,
       } as LlamaRequest),
     });
