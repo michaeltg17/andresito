@@ -2,8 +2,99 @@ import fs from "fs";
 import { execSync } from "child_process";
 
 const filePath = "app/src/calculator.js";
-const sourceCode = fs.readFileSync(filePath, "utf-8");
+const originalSourceCode = fs.readFileSync(filePath, "utf-8"); // Store original for restoration
+let sourceCode = originalSourceCode; // Use this as current state
 const testCode = fs.readFileSync("app/src/calculator.test.js", "utf-8");
+
+// Helper function to restore original source code
+function restoreOriginalSource(): void {
+  fs.writeFileSync(filePath, originalSourceCode);
+  sourceCode = originalSourceCode;
+  console.log("🔄 Restored original source file");
+}
+
+// Mutation tracking interfaces
+export interface MutationResult {
+  id: number;
+  description?: string;
+  mutationCode: string;
+  testResult: "passed" | "failed";
+  timestamp: Date;
+  diff?: {
+    deleted: string[];
+    added: string[];
+  };
+}
+
+// LLM response format for multiple mutations
+interface LLMMutation {
+  description: string;
+  code: string;
+}
+
+interface LLMResponseData {
+  mutations: LLMMutation[];
+}
+
+// Array to store all mutations
+const mutations: MutationResult[] = [];
+
+// Mutation ID counter
+let mutationIdCounter = 0;
+
+// Helper function to generate next mutation ID
+function getNextMutationId(): number {
+  return ++mutationIdCounter;
+}
+
+// Helper function to save mutation to array
+function saveMutation(
+  mutationCode: string,
+  testPassed: boolean,
+  description?: string,
+  diff?: { deleted: string[]; added: string[] }
+): MutationResult {
+  const mutation: MutationResult = {
+    id: getNextMutationId(),
+    description,
+    mutationCode,
+    testResult: testPassed ? "passed" : "failed",
+    timestamp: new Date(),
+    diff,
+  };
+  mutations.push(mutation);
+  return mutation;
+}
+
+// Helper function to get all mutations
+function getAllMutations(): MutationResult[] {
+  return mutations;
+}
+
+// Helper function to get mutation statistics
+function getMutationStats(): {
+  total: number;
+  passed: number;
+  failed: number;
+  survivalRate: number;
+} {
+  const total = mutations.length;
+  const passed = mutations.filter((m) => m.testResult === "passed").length;
+  const failed = mutations.filter((m) => m.testResult === "failed").length;
+  const survivalRate = total > 0 ? (passed / total) * 100 : 0;
+
+  return { total, passed, failed, survivalRate };
+}
+
+// Helper function to export mutations to JSON file
+function exportMutations(filename: string = "mutations.json"): void {
+  const exportData = mutations.map((m) => ({
+    ...m,
+    timestamp: m.timestamp.toISOString(),
+  }));
+  fs.writeFileSync(filename, JSON.stringify(exportData, null, 2));
+  console.log(`📁 Exported ${mutations.length} mutations to ${filename}`);
+}
 
 const prompt = `
 Test file:
@@ -12,8 +103,20 @@ ${testCode}
 Source file:
 ${sourceCode}
 
-Mutate the source code in a small way that should break the test.
-Return ONLY the full modified source file, nothing else, no markdown.
+Generate multiple mutations of the source code that should break the tests.
+Return ONLY a valid JSON object with this exact structure:
+{
+  "mutations": [
+    {
+      "description": "brief description of this mutation",
+      "code": "full mutated source code here"
+    },
+    ... more mutations
+  ]
+}
+
+Code must compile.
+Each mutation should be a small change that might break tests.
 `;
 
 interface LlamaRequest {
@@ -29,12 +132,46 @@ interface LlamaResponse {
     delta?: { content?: string; reasoning_content?: string };
     text?: string;
     message?: { content?: string; reasoning_content?: string };
+    finish_reason?: string;
   }>;
+}
+
+// Parse LLM response to extract mutations
+function parseMutations(text: string): LLMMutation[] {
+  const trimmedText = text.trim();
+  
+  // Try to extract JSON from markdown code blocks first
+  const jsonBlockMatch = trimmedText.match(/```(?:json)?\n([\s\S]*?)\n```/);
+  const jsonContent = jsonBlockMatch ? jsonBlockMatch[1].trim() : trimmedText;
+  
+  try {
+    const data = JSON.parse(jsonContent) as LLMResponseData;
+    if (data.mutations && Array.isArray(data.mutations)) {
+      return data.mutations.filter(m => m.code && m.code.trim());
+    }
+  } catch (e) {
+    console.log("⚠️ Failed to parse JSON, trying fallback...");
+  }
+  
+  // Fallback: try to find JSON anywhere in the text
+  const jsonMatch = trimmedText.match(/\{[\s\S]*"mutations"\s*:\s*\[[\s\S]*\][\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      const data = JSON.parse(jsonMatch[0]) as LLMResponseData;
+      if (data.mutations && Array.isArray(data.mutations)) {
+        return data.mutations.filter(m => m.code && m.code.trim());
+      }
+    } catch (e) {
+      console.log("⚠️ Fallback parsing also failed");
+    }
+  }
+  
+  throw new Error("Could not parse mutations from LLM response");
 }
 
 async function callLlamaStream(): Promise<string> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 180000);
+  const timeout = setTimeout(() => controller.abort(), 500000);
 
   let fullText = "";
   let reasoningText = "";
@@ -203,11 +340,14 @@ function parseFullSource(text: string): string {
   return trimmedText;
 }
 
-function applyFullSource(newSource: string): void {
+function applyFullSource(newSource: string): { deleted: string[]; added: string[] } {
   const oldLines = sourceCode.split("\n");
   const newLines = newSource.split("\n");
 
   console.log("\n🔍 Changes:");
+  
+  const deleted: string[] = [];
+  const added: string[] = [];
   
   // Show a diff-like comparison
   const maxLines = Math.max(oldLines.length, newLines.length);
@@ -218,14 +358,18 @@ function applyFullSource(newSource: string): void {
     if (oldLine !== newLine) {
       if (oldLine !== "<deleted>") {
         console.log(`- ${oldLine}`);
+        deleted.push(oldLine);
       }
       if (newLine !== "<added>") {
         console.log(`+ ${newLine}`);
+        added.push(newLine);
       }
     }
   }
 
   fs.writeFileSync(filePath, newSource);
+  
+  return { deleted, added };
 }
 
 function runTests(): boolean {
@@ -247,21 +391,56 @@ async function main(): Promise<void> {
 
   const output = await callLlamaStream();
 
-  console.log("\n\n🧠 Final output:\n", output);
+  console.log("\n\n🧠 Parsing mutations from LLM response...\n");
 
-  const newSource = parseFullSource(output);
+  const llmMutations = parseMutations(output);
+  console.log(`📥 Found ${llmMutations.length} mutations from LLM\n`);
 
-  console.log("\n✏️ Applying full source mutation");
+  if (llmMutations.length === 0) {
+    console.log("⚠️ No mutations found, exiting");
+    return;
+  }
 
-  applyFullSource(newSource);
+  // Process each mutation
+  for (let i = 0; i < llmMutations.length; i++) {
+    const llmMutation = llmMutations[i];
+    const mutationNum = i + 1;
 
-  const passed = runTests();
+    console.log(`\n${"=".repeat(50)}`);
+    console.log(`🧬 Mutation #${mutationNum}: ${llmMutation.description || "No description"}`);
+    console.log("=".repeat(50));
 
-  console.log(
-    passed
-      ? "\n❌ Test is weak (mutation survived)"
-      : "\n✅ Test caught the mutation"
-  );
+    const diff = applyFullSource(llmMutation.code);
+
+    const passed = runTests();
+
+    // Save mutation to array
+    const mutation = saveMutation(llmMutation.code, passed, llmMutation.description, diff);
+
+    console.log(
+      passed
+        ? "❌ Test is weak (mutation survived)"
+        : "✅ Test caught the mutation"
+    );
+
+    // Restore original source before next mutation
+    restoreOriginalSource();
+  }
+
+  // Print final statistics
+  console.log(`\n${"=".repeat(50)}`);
+  console.log("📈 Final Mutation Statistics:");
+  console.log("=".repeat(50));
+  const stats = getMutationStats();
+  console.log(`   Total mutations: ${stats.total}`);
+  console.log(`   Survived (passed): ${stats.passed}`);
+  console.log(`   Killed (failed): ${stats.failed}`);
+  console.log(`   Survival rate: ${stats.survivalRate.toFixed(1)}%`);
+
+  // Export mutations to JSON
+  exportMutations();
+
+  console.log("\n✅ All mutations processed. Original source file is intact.");
 }
 
 main().catch((e: Error) => {
