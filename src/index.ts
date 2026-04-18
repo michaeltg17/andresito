@@ -1,6 +1,14 @@
 import fs from "fs";
 import { execSync } from "child_process";
 
+import {
+  MutationResult,
+  LLMMutation,
+  LLMResponseData,
+  LlamaRequest,
+  LlamaResponse,
+} from "./interfaces";
+
 const filePath = "app/src/calculator.js";
 const originalSourceCode = fs.readFileSync(filePath, "utf-8"); // Store original for restoration
 let sourceCode = originalSourceCode; // Use this as current state
@@ -11,29 +19,6 @@ function restoreOriginalSource(): void {
   fs.writeFileSync(filePath, originalSourceCode);
   sourceCode = originalSourceCode;
   console.log("🔄 Restored original source file");
-}
-
-// Mutation tracking interfaces
-export interface MutationResult {
-  id: number;
-  description?: string;
-  mutationCode: string;
-  testResult: "passed" | "failed";
-  timestamp: Date;
-  diff?: {
-    deleted: string[];
-    added: string[];
-  };
-}
-
-// LLM response format for multiple mutations
-interface LLMMutation {
-  description: string;
-  code: string;
-}
-
-interface LLMResponseData {
-  mutations: LLMMutation[];
 }
 
 // Array to store all mutations
@@ -118,23 +103,6 @@ Return ONLY a valid JSON object with this exact structure:
 Code must compile.
 Each mutation should be a small change that might break tests.
 `;
-
-interface LlamaRequest {
-  model: string;
-  messages: Array<{ role: string; content: string }>;
-  temperature: number;
-  max_tokens: number;
-  stream: boolean;
-}
-
-interface LlamaResponse {
-  choices?: Array<{
-    delta?: { content?: string; reasoning_content?: string };
-    text?: string;
-    message?: { content?: string; reasoning_content?: string };
-    finish_reason?: string;
-  }>;
-}
 
 // Parse LLM response to extract mutations
 function parseMutations(text: string): LLMMutation[] {
