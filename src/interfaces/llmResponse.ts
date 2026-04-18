@@ -3,6 +3,6 @@ export interface LLMMutation {
   code: string;
 }
 
-export interface LLMResponseData {
+export interface LLMResponse {
   mutations: LLMMutation[];
 }

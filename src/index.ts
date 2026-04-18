@@ -2,11 +2,10 @@ import fs from "fs";
 
 import {
   MutationResult,
-  LLMMutation,
-  LLMResponseData,
 } from "./interfaces";
 import { runMutation } from "./services/mutationRunner";
-import { callLlamaStream, setPrompt } from "./services/llmService";
+import { callLlamaStream, setPrompt } from "./services/llamaService";
+import { parseMutations } from "./services/mutationParser";
 
 const testCode = fs.readFileSync("app/src/calculator.test.js", "utf-8");
 const sourceCode = fs.readFileSync("app/src/calculator.js", "utf-8");
@@ -16,11 +15,6 @@ setPrompt(testCode, sourceCode);
 
 // Array to store all mutations
 const mutations: MutationResult[] = [];
-
-// Helper function to get all mutations
-function getAllMutations(): MutationResult[] {
-  return mutations;
-}
 
 // Helper function to get mutation statistics
 function getMutationStats(): {
@@ -35,39 +29,6 @@ function getMutationStats(): {
   const survivalRate = total > 0 ? (passed / total) * 100 : 0;
 
   return { total, passed, failed, survivalRate };
-}
-
-// Parse LLM response to extract mutations
-function parseMutations(text: string): LLMMutation[] {
-  const trimmedText = text.trim();
-  
-  // Try to extract JSON from markdown code blocks first
-  const jsonBlockMatch = trimmedText.match(/```(?:json)?\n([\s\S]*?)\n```/);
-  const jsonContent = jsonBlockMatch ? jsonBlockMatch[1].trim() : trimmedText;
-  
-  try {
-    const data = JSON.parse(jsonContent) as LLMResponseData;
-    if (data.mutations && Array.isArray(data.mutations)) {
-      return data.mutations.filter(m => m.code && m.code.trim());
-    }
-  } catch (e) {
-    console.log("⚠️ Failed to parse JSON, trying fallback...");
-  }
-  
-  // Fallback: try to find JSON anywhere in the text
-  const jsonMatch = trimmedText.match(/\{[\s\S]*"mutations"\s*:\s*\[[\s\S]*\][\s\S]*\}/);
-  if (jsonMatch) {
-    try {
-      const data = JSON.parse(jsonMatch[0]) as LLMResponseData;
-      if (data.mutations && Array.isArray(data.mutations)) {
-        return data.mutations.filter(m => m.code && m.code.trim());
-      }
-    } catch (e) {
-      console.log("⚠️ Fallback parsing also failed");
-    }
-  }
-  
-  throw new Error("Could not parse mutations from LLM response");
 }
 
 async function main(): Promise<void> {
