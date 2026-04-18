@@ -1,41 +1,9 @@
 import { LlamaRequest, LlamaResponse } from "../interfaces";
 
-export const sourceCode = `// Calculator source code will be loaded at runtime`;
-
-export let prompt = "";
-
-/**
- * Sets the source and test code for the LLM prompt
- */
-export function setPrompt(testCode: string, sourceCode: string): void {
-  prompt = `
-Test file:
-${testCode}
-
-Source file:
-${sourceCode}
-
-Generate multiple mutations of the source code that should break the tests.
-Return ONLY a valid JSON object with this exact structure:
-{
-  "mutations": [
-    {
-      "description": "brief description of this mutation",
-      "code": "full mutated source code here"
-    },
-    ... more mutations
-  ]
-}
-
-Code must compile.
-Each mutation should be a small change that might break tests.
-`;
-}
-
 /**
  * Makes a streaming request to the Llama API
  */
-export async function callLlamaStream(): Promise<string> {
+export async function callLlamaStream(prompt: string): Promise<string> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 500000);
 
@@ -135,14 +103,14 @@ export async function callLlamaStream(): Promise<string> {
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.log(`\n⚠️ Streaming failed: ${errorMsg}, falling back...\n`);
     clearTimeout(timeout);
-    return await callLlamaOnce();
+    return await callLlamaOnce(prompt);
   }
 }
 
 /**
  * Makes a non-streaming request to the Llama API (fallback)
  */
-export async function callLlamaOnce(): Promise<string> {
+export async function callLlamaOnce(prompt: string): Promise<string> {
   console.log("🔄 Attempting non-streaming request...\n");
 
   const res = await fetch("http://localhost:8080/v1/chat/completions", {

@@ -4,14 +4,12 @@ import {
   MutationResult,
 } from "./interfaces";
 import { runMutation } from "./services/mutationRunner";
-import { callLlamaStream, setPrompt } from "./services/llamaService";
+import { callLlamaStream } from "./services/llamaService";
+import { buildPrompt } from "./services/promptBuilder";
 import { parseMutations } from "./services/mutationParser";
 
 const testCode = fs.readFileSync("app/src/calculator.test.js", "utf-8");
 const sourceCode = fs.readFileSync("app/src/calculator.js", "utf-8");
-
-// Set up the LLM prompt with test and source code
-setPrompt(testCode, sourceCode);
 
 // Array to store all mutations
 const mutations: MutationResult[] = [];
@@ -34,7 +32,8 @@ function getMutationStats(): {
 async function main(): Promise<void> {
   console.log("📖 Loaded source file");
 
-  const output = await callLlamaStream();
+  const prompt = buildPrompt(testCode, sourceCode);
+  const output = await callLlamaStream(prompt);
 
   console.log("\n\n🧠 Parsing mutations from LLM response...\n");
 
